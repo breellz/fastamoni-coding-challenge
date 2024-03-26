@@ -1,0 +1,1 @@
+# fastamoni-coding-challenge

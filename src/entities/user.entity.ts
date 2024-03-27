@@ -82,13 +82,9 @@ export class User {
       },
     );
   }
-
-  getSimpleProfile() {
-    return {
-      ID: this.ID,
-      email: this.email,
-      username: this.username,
-    };
+  toJSON() {
+    const { password, ...other } = this;
+    return other;
   }
 }
 

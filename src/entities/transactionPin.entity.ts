@@ -47,6 +47,11 @@ export class TransactionPin {
   async checkIfPinIsValid(pin: string) {
     return bcrypt.compare(pin, this.pin);
   }
+
+  toJSON() {
+    const { pin, ...other } = this;
+    return other;
+  }
 }
 
 export type ITransactionPin = {

@@ -29,5 +29,22 @@ const pinValidation = (data: { pin: string }) => {
   return schema.validate(data);
 }
 
+const donationValidation = (data: { amount: number, beneficiaryUsername: string, transactionPin: string, message?: string }) => {
 
-export { RegistrationValidation, loginValidation, pinValidation };
+  const schema = Joi.object({
+    amount: Joi.number().min(0).required(),
+    beneficiaryUsername: Joi.string().required(),
+    transactionPin: Joi.string().min(4).required(),
+    message: Joi.string()
+  }).options({ convert: false })
+  return schema.validate(data);
+
+}
+
+
+export {
+  RegistrationValidation,
+  loginValidation,
+  pinValidation,
+  donationValidation
+};

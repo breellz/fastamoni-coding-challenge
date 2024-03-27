@@ -15,6 +15,11 @@ import {
 
 import { Wallet } from "./wallet.entity";
 
+export enum TransactionType {
+  DEBIT = "DEBIT",
+  CREDIT = "CREDIT",
+}
+
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
@@ -25,6 +30,12 @@ export class Transaction {
 
   @Column({ type: "decimal", precision: 10, scale: 2 })
   amount: number;
+
+  @Column({
+    type: "enum",
+    enum: TransactionType,
+  })
+  type: TransactionType;
 
   @Column({ length: 255 })
   description: string;

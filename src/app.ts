@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import "dotenv/config";
-import { AuthRouter } from "./routers/api/v1/auth";
+import { AuthRouter } from "./routers/api/v1/auth.route";
+import { UserRouter } from "./routers/api/v1/user.route";
 
 import datasource from './datasource'
 
@@ -15,6 +16,7 @@ export const main = async () => {
     })
 
     app.use("/api/v1/auth", AuthRouter);
+    app.use("/api/v1/user", UserRouter);
 
     await datasource.initialize();
     console.log(`Database connected to ${datasource.options.database}`);

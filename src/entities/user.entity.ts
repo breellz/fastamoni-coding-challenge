@@ -17,7 +17,7 @@ import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt"
 import { Donation } from "./donation.entity";
 import { Wallet } from "./wallet.entity";
-import { PIN, IPIN } from "./transactionPin.entity";
+import { TransactionPin, ITransactionPin } from "./transactionPin.entity";
 
 @Entity()
 @Unique(["email"])
@@ -35,9 +35,9 @@ export class User {
   @Column({ length: 255, nullable: false })
   password: string;
 
-  @OneToOne(() => PIN, (pin) => pin.user)
-  @JoinColumn({ name: "pinID" })
-  transactionPin: IPIN;
+  @OneToOne(() => TransactionPin, (transactionPin) => transactionPin.user)
+  @JoinColumn({ name: "transactionPinID" })
+  transactionPin: ITransactionPin;
 
   @OneToMany(() => Donation, (donation) => donation.donor)
   userDonations: Donation[];

@@ -1,6 +1,6 @@
 import datasource from "../../../datasource";
-import { User } from "../../../entities/user.entity";
-
+import { User, IUser } from "../../../entities/user.entity";
+import { TransactionPin, ITransactionPin } from "../../../entities/transactionPin.entity";
 export class UserService {
   static async getUserByEmail(email: string) {
     const userRepo = datasource.getRepository(User);
@@ -8,7 +8,11 @@ export class UserService {
       const user = await userRepo.findOne({
         where: {
           email
-        }
+        }, relations: [
+          'transactionPin',
+          'wallet',
+          'userDonations',
+          'receivedDonations']
       });
 
       return user
@@ -28,6 +32,22 @@ export class UserService {
 
       return user
     } catch (error) {
+      throw error
+    }
+  }
+
+  static async createTransactionPin(user: User, pin: string) {
+    const pinRepo = datasource.getRepository(TransactionPin);
+    try {
+      const transactionPin = new TransactionPin();
+      transactionPin.pin = pin;
+      await pinRepo.save(transactionPin);
+      user.transactionPin = transactionPin
+      await datasource.getRepository(User).save(user)
+      return transactionPin
+
+    } catch (error) {
+      console.log(error)
       throw error
     }
   }

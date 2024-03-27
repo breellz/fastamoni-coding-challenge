@@ -12,26 +12,23 @@ import { IUser, User } from "./user.entity";
 import * as bcrypt from "bcrypt"
 
 @Entity()
-export class PIN {
+export class TransactionPin {
   @PrimaryGeneratedColumn()
   ID: number;
 
   @OneToOne(() => User, (user) => user.transactionPin)
-  @JoinColumn({ name: "userID" })
   user: IUser;
 
   @Column()
   pin: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
-  @Column()
-  expiresIn: Date;
-
   @BeforeInsert()
-  async hashPassword() {
-    this.pin = await bcrypt.hash(this.pin, 8);
+  async hashPin() {
+    if (typeof this.pin === 'string') {
+      this.pin = await bcrypt.hash(this.pin, 8);
+    } else {
+      throw new Error('Pin must be a string');
+    }
   }
 
   @CreateDateColumn({
@@ -52,6 +49,6 @@ export class PIN {
   }
 }
 
-export type IPIN = {
-  [T in keyof PIN]: PIN[T];
+export type ITransactionPin = {
+  [T in keyof TransactionPin]: TransactionPin[T];
 };

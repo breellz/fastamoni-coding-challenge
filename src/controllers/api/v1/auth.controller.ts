@@ -1,8 +1,7 @@
-import { Request, Response } from "express"
-import { RegistrationValidation, loginValidation } from "../../../utils/validators/joi"
-import { AuthServices } from "../../../services/api/v1/auth.services"
+import { Request, Response } from "express";
+import { AuthServices } from "../../../services/api/v1/auth.services";
 import { UserService } from "../../../services/api/v1/user.service";
-import { User } from "../../../entities/user.entity";
+import { RegistrationValidation, loginValidation } from "../../../utils/validators/joi";
 
 export class AuthController {
   static async SignUp(req: Request, res: Response) {

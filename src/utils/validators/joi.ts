@@ -41,10 +41,21 @@ const donationValidation = (data: { amount: number, beneficiaryUsername: string,
 
 }
 
+const donationFilterValidation = (data: { limit?: number, page?: number, startDate?: Date, endDate?: Date }) => {
+  const schema = Joi.object({
+    limit: Joi.number().integer().min(1).optional(),
+    page: Joi.number().integer().min(1).optional(),
+    startDate: Joi.date().iso().optional(),
+    endDate: Joi.date().iso().greater(Joi.ref('startDate')).optional()
+  });
+  return schema.validate(data);
+}
+
 
 export {
   RegistrationValidation,
   loginValidation,
   pinValidation,
-  donationValidation
+  donationValidation,
+  donationFilterValidation
 };

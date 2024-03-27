@@ -138,10 +138,9 @@ export class UserService {
         .andWhere("donation.createdAt BETWEEN :start AND :end", { start, end })
         .getCount();
 
-      console.log('totalCount:', totalCount);
-      console.log('limit:', limit);
+
       const totalPages = Math.ceil(totalCount / limit);
-      console.log('totalPages:', totalPages);
+
 
       return {
         totalDonationsGiven: givenDonations.length,
@@ -182,6 +181,17 @@ export class UserService {
         relations: ['donor', 'beneficiary']
       });
       return donation
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static async getUserDonationCount(user: User) {
+    try {
+      const count = await datasource.createQueryBuilder(Donation, "donation")
+        .where("donation.donor.ID = :donorId", { donorId: user.ID })
+        .getCount();
+      return count
     } catch (error) {
       throw error
     }

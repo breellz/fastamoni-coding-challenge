@@ -1,8 +1,9 @@
 import { Response } from 'express';
 import { CustomRequest } from '../../../middleware/auth';
 import { IDonationFilter, UserService } from '../../../services/api/v1/user.service';
-import { pinValidation, donationValidation } from '../../../utils/validators/joi';
+import { pinValidation, donationValidation, donationFilterValidation } from '../../../utils/validators/joi';
 import { TransactionType } from '../../../entities/transaction.entity';
+import { sendMail, IMailOptions } from "../../../utils/mailer";
 export class UserController {
   static async createTransactionPin(req: CustomRequest, res: Response) {
     const pin = req.body
@@ -67,11 +68,30 @@ export class UserController {
           message: "Beneficiary not found"
         })
       }
+      if (beneficiary.email === user.email) {
+        return res.status(400).send({
+          message: "You can't donate to yourself"
+        })
+      }
       //create donation
       const { donation, wallet } = await UserService.createDonation(user!, beneficiary, amount, message);
       //create wallet transactions for user and beneficicary
       await UserService.createWalletTransaction(user.wallet, amount, TransactionType.DEBIT);
       await UserService.createWalletTransaction(beneficiary.wallet, amount, TransactionType.CREDIT);
+      // Get the count of the user's donations
+      const donationCount = await UserService.getUserDonationCount(user);
+
+      // If the user has made two or more donations, send a thank you message
+
+      if (donationCount >= 2) {
+        //send mail
+        const mailOptions: IMailOptions = {
+          message: "Thank you for making a donation, we really appreciate your kindness.",
+          email: user.email,
+          subject: "Thank you for your donation",
+        }
+        sendMail(mailOptions)
+      }
       return res.status(201).send({
         message: "Donation created successfully",
         data: {
@@ -90,6 +110,12 @@ export class UserController {
     let { limit, page, startDate, endDate }: IDonationFilter = req.query;
 
     try {
+      const { error } = donationFilterValidation({ limit, page, startDate, endDate });
+      if (error) {
+        return res.status(400).send({
+          message: error.details[0].message
+        });
+      }
       const user = await UserService.getUserByEmail(req.user!.email);
       if (!user) {
         return res.status(404).send({

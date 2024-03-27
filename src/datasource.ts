@@ -12,7 +12,7 @@ const datasource: DataSource = new DataSource({
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
   entities: [path.join(__dirname, '/entities/**/*.entity{.ts,.js}')],
-  synchronize: false,
+  synchronize: true,
   migrations: [
     process.env.NODE_ENV === 'production'
       ? path.join(__dirname, '/migrations/*.js')

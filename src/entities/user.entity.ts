@@ -10,12 +10,14 @@ import {
   Unique,
   CreateDateColumn,
   UpdateDateColumn,
-  Not,
+  BeforeInsert,
+
 } from "typeorm";
 import * as jwt from "jsonwebtoken";
+import * as bcrypt from "bcrypt"
 import { Donation } from "./donation.entity";
 import { Wallet } from "./wallet.entity";
-import { PIN, IPIN } from "./pin.entity";
+import { PIN, IPIN } from "./transactionPin.entity";
 
 @Entity()
 @Unique(["email"])
@@ -23,9 +25,19 @@ export class User {
   @PrimaryGeneratedColumn()
   ID: number;
 
+  @Index("email_index")
+  @Column({ length: 255, nullable: false })
+  email: string;
+
+  @Column({ length: 255, nullable: false })
+  username: string;
+
+  @Column({ length: 255, nullable: false })
+  password: string;
+
   @OneToOne(() => PIN, (pin) => pin.user)
   @JoinColumn({ name: "pinID" })
-  pin: IPIN;
+  transactionPin: IPIN;
 
   @OneToMany(() => Donation, (donation) => donation.donor)
   userDonations: Donation[];
@@ -37,16 +49,14 @@ export class User {
   @JoinColumn({ name: "walletID" })
   wallet: Wallet;
 
-  @Index("email_index")
-  @Column({ length: 255, nullable: false })
-  email: string;
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
 
-
-  @Column({ length: 255, nullable: false })
-  username: string;
-
-  @Column({ length: 255, nullable: false })
-  password: string;
+  async checkIfPlainPasswordIsValid(plainPassword: string) {
+    return bcrypt.compare(plainPassword, this.password);
+  }
 
   @CreateDateColumn({
     type: "timestamp",

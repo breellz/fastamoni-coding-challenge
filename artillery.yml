@@ -1,0 +1,59 @@
+config:
+ target: "http://localhost:8888/api/v1"
+ phases:
+  - duration: 3
+    arrivalRate: 1
+ ensure:
+  p99: 50
+ defaults:
+  timeout: 30
+ processor: "./src/utils/generateUserData.js"
+scenarios:
+ - name: "User flow"
+   flow:
+    - post:
+       url: "/auth/signUp"
+       beforeRequest: generateUserData
+       json:
+        email: "{{ email }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+       afterResponse: "logResponse"
+    - post:
+       url: "/auth/login"
+       json:
+        email: "{{ email }}"
+        password: "{{ password }}"
+       capture:
+        json: "$.token"
+        as: "authToken"
+       afterResponse: "logResponse"
+    - post:
+       url: "/user/transaction-pin"
+       headers:
+        Authorization: "Bearer {{ authToken }}"
+       json:
+        pin: "1234"
+       afterResponse: "logResponse"
+    - post:
+       url: "/user/donate"
+       headers:
+        Authorization: "Bearer {{ authToken }}"
+       json:
+        amount: 100
+        beneficiaryUsername: "artilleryTest"
+        transactionPin: "1234"
+       capture:
+        json: "$.data.donation.ID"
+        as: "donationId"
+       afterResponse: "logResponse"
+    - get:
+       url: "/user/donations"
+       headers:
+        Authorization: "Bearer {{ authToken }}"
+       afterResponse: "logResponse"
+    - get:
+       url: "/user/donations/{{donationId}}"
+       headers:
+        Authorization: "Bearer {{ authToken }}"
+       afterResponse: "logResponse"

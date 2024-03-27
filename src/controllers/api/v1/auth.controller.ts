@@ -21,14 +21,13 @@ export class AuthController {
           message: "User already exists with that email"
         });
       }
-      //check if usernameq exists
+      //check if username exists
       const usernameExists = await UserService.getUserByUsername(username);
       if (usernameExists) {
         return res.status(400).send({
           message: "Username already exists"
         });
       }
-      //create user
       const data = await AuthServices.signUp({ email, username, password });
 
       return res.status(201).send({

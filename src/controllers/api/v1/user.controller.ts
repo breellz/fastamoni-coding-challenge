@@ -74,7 +74,7 @@ export class UserController {
         })
       }
       //create donation
-      const { donation, wallet } = await UserService.createDonation(user!, beneficiary, amount, message);
+      const { donation } = await UserService.createDonation(user!, beneficiary, amount, message);
       //create wallet transactions for user and beneficicary
       await UserService.createWalletTransaction(user.wallet, amount, TransactionType.DEBIT);
       await UserService.createWalletTransaction(beneficiary.wallet, amount, TransactionType.CREDIT);
@@ -95,8 +95,7 @@ export class UserController {
       return res.status(201).send({
         message: "Donation created successfully",
         data: {
-          donation,
-          wallet
+          donation
         }
       });
     } catch (error) {
@@ -128,10 +127,7 @@ export class UserController {
         message: "User donations fetched",
         totalCount: response.totalCount,
         totalPages: response.totalPages,
-        GivenDonations: response.totalDonationsGiven,
-        ReceivedDonations: response.totalDonationsReceived,
-        givenDonationsList: response.givenDonations,
-        receivedDonationsList: response.receivedDonations
+        data: response.donations
       });
     } catch (error) {
       return res.status(400).send({

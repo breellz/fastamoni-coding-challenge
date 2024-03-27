@@ -21,11 +21,12 @@ import { TransactionPin, ITransactionPin } from "./transactionPin.entity";
 
 @Entity()
 @Unique(["email"])
+@Index("username_index", ["username"])
+@Index("email_index", ["email"])
 export class User {
   @PrimaryGeneratedColumn()
   ID: number;
 
-  @Index("email_index")
   @Column({ length: 255, nullable: false })
   email: string;
 
@@ -78,7 +79,7 @@ export class User {
       },
       process.env.JWT_SECRET as jwt.Secret,
       {
-        expiresIn: "7d"
+        expiresIn: "3d"
       },
     );
   }

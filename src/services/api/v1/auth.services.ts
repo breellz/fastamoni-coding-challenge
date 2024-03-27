@@ -29,24 +29,13 @@ export class AuthServices {
     try {
       //make user and wallet creation transactional
       const data = await datasource.manager.transaction(async EntityManager => {
-        const savedUser = await EntityManager.save(user);
-        const savedWallet = await EntityManager.save(wallet);
+        // Save user and wallet in a single operation
+        const [savedUser, savedWallet] = await EntityManager.save([user, wallet]);
         return { savedUser, savedWallet };
       });
-      //send mail
-      const mailOptions: IMailOptions = {
-        message: "Welcome to our platform",
-        email: data.savedUser.email,
-        subject: "Welcome",
-      }
-      sendMail(mailOptions)
       return data
     } catch (error) {
       throw error;
     }
-  }
-
-  static async login(data: ILoginData) {
-
   }
 }

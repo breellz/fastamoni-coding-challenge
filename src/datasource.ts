@@ -13,12 +13,12 @@ const datasource: DataSource = new DataSource({
   database: process.env.POSTGRES_DB,
   entities: [path.join(__dirname, '/entities/**/*.entity{.ts,.js}')],
   synchronize: true,
-  migrations: [
-    process.env.NODE_ENV === 'production'
-      ? path.join(__dirname, '/migrations/*.js')
-      : path.join(__dirname, '/migrations/*.ts'),
-  ],
-  migrationsRun: true,
+  // migrations: [
+  //   process.env.NODE_ENV === 'production'
+  //     ? path.join(__dirname, '/migrations/*.js')
+  //     : path.join(__dirname, '/migrations/*.ts'),
+  // ],
+  // migrationsRun: true,
 });
 
 export default datasource;

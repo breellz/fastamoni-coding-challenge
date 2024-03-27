@@ -20,9 +20,7 @@ export class UserService {
           email
         }, relations: [
           'transactionPin',
-          'wallet',
-          'userDonations',
-          'receivedDonations']
+          'wallet']
       });
 
       return user
@@ -39,9 +37,7 @@ export class UserService {
           username
         }, relations: [
           'transactionPin',
-          'wallet',
-          'userDonations',
-          'receivedDonations']
+          'wallet',]
       });
 
       return user
@@ -67,7 +63,6 @@ export class UserService {
   }
 
   static async createDonation(donor: User, beneficiary: User, amount: number, message?: string) {
-
     try {
       const donation = new Donation();
       donation.amount = amount;
@@ -79,15 +74,14 @@ export class UserService {
       //debit donor wallet
       donor.wallet.balance -= amount;
 
-      //make it transactional to aavoid race conditions
-      const data = datasource.manager.transaction(async transactionalEntityManager => {
+      //make it transactional to avoid race conditions
+      const data = await datasource.manager.transaction(async transactionalEntityManager => {
         const savedDonation = await transactionalEntityManager.save(donation);
-        const donorWallet = await transactionalEntityManager.save(donor.wallet);
-        await transactionalEntityManager.save(beneficiary.wallet);
+        // Save donor.wallet and beneficiary.wallet in a single operation
+        await transactionalEntityManager.save([donor.wallet, beneficiary.wallet]);
 
         return {
-          donation: savedDonation,
-          wallet: donorWallet
+          donation: savedDonation
         }
       });
       return data
@@ -98,8 +92,8 @@ export class UserService {
 
   static async getUserDonations(user: User, filters: IDonationFilter) {
     let { startDate, endDate, limit, page } = filters;
-    limit = limit ? limit : 10
-    page = page ? page : 1
+    limit = limit ? limit : 10;
+    page = page ? page : 1;
 
     const skip = (page - 1) * limit;
 
@@ -113,42 +107,26 @@ export class UserService {
     const start = startDate ? new Date(startDate) : new Date('1970-01-01');
 
     try {
-      const [givenDonations, receivedDonations] = await Promise.all([
-        datasource.createQueryBuilder(Donation, "donation")
-          .leftJoinAndSelect("donation.beneficiary", "beneficiary")
-          .where("donation.donor.ID = :donorId", { donorId: user.ID })
-          .andWhere("donation.createdAt BETWEEN :start AND :end", { start, end })
-          .skip(skip)
-          .take(limit)
-          .getMany(),
-
-        datasource.createQueryBuilder(Donation, "donation")
-          .leftJoinAndSelect("donation.donor", "donor")
-          .where("donation.beneficiary.ID = :beneficiaryId", { beneficiaryId: user.ID })
-          .andWhere("donation.createdAt BETWEEN :start AND :end", { start, end })
-          .skip(skip)
-          .take(limit)
-          .getMany()
-
-
-      ]);
+      const donations = await datasource.createQueryBuilder(Donation, "donation")
+        .leftJoinAndSelect("donation.beneficiary", "beneficiary")
+        .leftJoinAndSelect("donation.donor", "donor")
+        .where("(donation.donor.ID = :userId OR donation.beneficiary.ID = :userId) AND donation.createdAt BETWEEN :start AND :end", { userId: user.ID, start, end })
+        .orderBy("donation.createdAt", "DESC")
+        .skip(skip)
+        .take(limit)
+        .getMany();
 
       const totalCount = await datasource.createQueryBuilder(Donation, "donation")
-        .where("donation.donor.ID = :donorId OR donation.beneficiary.ID = :beneficiaryId", { donorId: user.ID, beneficiaryId: user.ID })
-        .andWhere("donation.createdAt BETWEEN :start AND :end", { start, end })
+        .where("(donation.donor.ID = :userId OR donation.beneficiary.ID = :userId) AND donation.createdAt BETWEEN :start AND :end", { userId: user.ID, start, end })
         .getCount();
-
 
       const totalPages = Math.ceil(totalCount / limit);
 
 
       return {
-        totalDonationsGiven: givenDonations.length,
-        totalDonationsReceived: receivedDonations.length,
-        givenDonations,
-        receivedDonations,
         totalCount,
-        totalPages
+        totalPages,
+        donations
       };
     } catch (error) {
       throw error;

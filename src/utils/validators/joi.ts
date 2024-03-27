@@ -9,15 +9,15 @@ const RegistrationValidation = (data: IRegistrationData) => {
       .min(8)
       .required()
       .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
-    email: Joi.string().min(6).required().email(),
+    email: Joi.string().required().email(),
   });
   return schema.validate(data);
 };
 
 const loginValidation = (data: ILoginData) => {
   const schema = Joi.object({
-    password: Joi.string().min(6).required(),
-    email: Joi.string().min(6).required().email(),
+    password: Joi.string().min(8).required(),
+    email: Joi.string().required().email(),
   });
   return schema.validate(data);
 };

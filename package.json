@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:daemon": "forever start src/index.ts",
+    "start:daemon": "forever start -c ts-node src/index.ts",
     "stop:daemon": "forever stop src/index.ts",
     "test:load": "artillery run artillery.yml",
     "dev": "nodemon src/index.ts",
@@ -21,6 +21,7 @@
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
     "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.11.30",

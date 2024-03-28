@@ -7,10 +7,6 @@ module.exports = {
   return next();
  },
  logResponse: (requestParams, response, context, ee, next) => {
-  console.log("Request Params:", requestParams);
-  console.log("Status Code:", response.statusCode);
-  console.log("Body:", response.body);
-
   // console.log("Request Params:", requestParams);
   // console.log("Status Code:", response.statusCode);
   // console.log("Body:", response.body);

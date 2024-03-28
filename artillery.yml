@@ -1,8 +1,8 @@
 config:
  target: "http://localhost:8888/api/v1"
  phases:
-  - duration: 3
-    arrivalRate: 1
+  - duration: 30
+    arrivalRate: 100
  ensure:
   p99: 50
  defaults:
